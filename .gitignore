@@ -44,8 +44,8 @@ Gemfile.lock
 #\#*
 #.\#*
 
-# For vim:
-#*.swp
+ For vim:
+*.swp
 
 # For redcar:
 #.redcar

@@ -24,19 +24,9 @@ module Objectify
           rails_options     = options.merge(:controller => controller)
 
           args.each do |resource_name|
-            objectify_defaults = {:objectify => {:resource => resource_name}}
-            defaults = (rails_options[:defaults] || {}).merge(objectify_defaults)
-            with_defaults = rails_options.merge(:defaults => defaults)
-            @rails_mapper.resources(resource_name, with_defaults)
-
-            RESOURCE_ACTIONS.each do |action_name|
-              action = @action_factory.new(resource_name,
-                                           action_name,
-                                           objectify_options,
-                                           @application.objectify.policies)
-
-              @application.objectify.append_action(action)
-            end
+            merged_defaults = objectify_defaults(resource_name, rails_options)
+            @rails_mapper.resources(resource_name, merged_defaults)
+            RESOURCE_ACTIONS.each { |action_name| append_action(resource_name, action_name, objectify_options) }
           end
         end
 
@@ -53,13 +43,7 @@ module Objectify
         end
 
         def legacy_action(controller, actions, options)
-          [*actions].each do |action_name|
-            action = @action_factory.new(controller,
-                                         action_name,
-                                         options,
-                                         @application.objectify.policies)
-            @application.objectify.append_action(action)
-          end
+          [*actions].each { |action_name| append_action(controller, action_name, options) }
         end
 
         private
@@ -67,6 +51,21 @@ module Objectify
             Hash[*(RESOURCE_ACTIONS + OBJECTIFY_OPTIONS).map do |key|
               [key, options.delete(key)] if options.include?(key)
             end.compact.flatten]
+          end
+          
+          def objectify_defaults(resource_name, rails_options)
+            defaults = {:objectify => {:resource => resource_name}}
+            defaults = (rails_options[:defaults] || {}).merge(defaults)
+            defaults = rails_options.merge(:defaults => defaults)
+          end
+
+          def append_action(resource_name, action_name, options)
+            action = @action_factory.new(resource_name,
+                                         action_name,
+                                         options,
+                                         @application.objectify.policies)
+
+            @application.objectify.append_action(action)
           end
       end
 
