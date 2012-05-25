@@ -52,7 +52,7 @@ module Objectify
               [key, options.delete(key)] if options.include?(key)
             end.compact.flatten]
           end
-          
+
           def objectify_defaults(resource_name, rails_options)
             defaults = {:objectify => {:resource => resource_name}}
             defaults = (rails_options[:defaults] || {}).merge(defaults)
