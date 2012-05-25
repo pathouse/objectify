@@ -45,12 +45,16 @@ end
 
 Also, the ability to override decorations at the resource or action level:
 
+```ruby
 objectify.resources :pictures, :decorate => {:picture_creation_service => :generic_service_instrumentation}
+```
 
 Also, injectables in general:
 
+```ruby
 objectify.resources :pictures, :resolve => {:storage_service => :s3_storage_service}
 objectify.resources :videos, :resolve => {:storage_service => :riak_storage_service}
+```
 
 ## Ideas on API
 
