@@ -13,7 +13,7 @@ module Objectify
 
       attr_reader :policy_responders, :defaults, :actions, :policies
       attr_writer :injector, :resolver_locator, :instantiator, :executor,
-                  :locator, :objectify_controller
+                  :resolvers, :objectify_controller
 
       def initialize(policies_factory = Policies, action_factory = Action)
         @policies_factory = policies_factory
@@ -59,14 +59,14 @@ module Objectify
         @injector ||= Injector.new(resolver_locator)
       end
 
-      def append_resolutions(opts)
+      def append_resolvers(opts)
         opts.each do |k,v|
-          locator.add(k, v)
+          resolvers.add(k, v)
         end
       end
 
-      def locator
-        @locator ||= NamedValueResolverLocator.new(NameTranslationResolver)
+      def resolvers
+        @resolvers ||= NamedValueResolverLocator.new(NameTranslationResolver)
       end
 
       def resolver_locator

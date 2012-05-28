@@ -70,16 +70,16 @@ describe "Objectify::Config::Context" do
     end
   end
 
-  context "appending resolutions" do
+  context "appending resolvers" do
     before do
-      @locator = stub("ResolverLocator", :add => nil)
-      @context = Objectify::Config::Context.new(nil)
-      @context.locator = @locator
-      @context.append_resolutions :something => String.new
+      @resolvers = stub("ResolverLocator", :add => nil)
+      @context   = Objectify::Config::Context.new(nil)
+      @context.resolvers = @resolvers
+      @context.append_resolvers :something => String.new
     end
 
     it "adds them to a locator it has" do
-      @locator.should have_received(:add).with(:something, String.new)
+      @resolvers.should have_received(:add).with(:something, String.new)
     end
   end
 
