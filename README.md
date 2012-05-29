@@ -86,7 +86,7 @@ Objectify has two primary components:
         end
       ```
 
-  2. A dependency injection framework. Objectify automatically injects dependencies into objects it manages based on parameter names. So, if you have a service method signature like  `PictureCreationService#call(params)`, objectify will automatically inject the request's params when it calls that method. It's very simple to create custom injections by implementing Resolver classes. More on that below.
+  2. A dependency injection framework. Objectify automatically injects dependencies into objects it manages based on parameter names. So, if you have a service method signature like  `PictureCreationService#call(params)`, objectify will automatically inject the request's params when it calls that method. It's very simple to create custom injections. More on that below.
 
 
 ## What if I have a bunch of existing rails code?
@@ -140,7 +140,47 @@ end
 
 ## Custom Injections
 
-Several of the above methods have parameters named `current_user`. By default, objectify won't know how to inject a parameter by that name, so it'll raise an error when it encounters one. Here's how to create a custom resolver for it that'll automatically get found by name.
+There are a few ways to customize what gets injected when. By default, when objectify sees a parameter called `something`, it'll first look to see if something is specifically configured for that name, then it'll attempt to satisfy it by calling `Something.new`. If that doesn't exist, it'll try `SomethingResolver.new`, which it'll then call `#call` on. If that doesn't exist, it'll raise an error.
+
+You can configure the injector in 3 ways. The first is used to specify an implemenation.
+
+Let's say you had a PictureCreationService whose constructor took a parameter called `storage`.
+
+```ruby
+class PictureCreationService
+  def initialize(storage)
+    @storage = storage
+  end
+
+  # ... more code ...
+end
+```
+
+You can tell the injector what to supply for that parameter like this:
+
+```ruby
+objectify.implementations :storage => :s3_storage
+```
+
+Another option is to specify a value. For example, you might have a service class with a page_size parameter.
+
+```ruby
+class PicturesIndexService
+  def initialize(page_size)
+    @page_size = page_size
+  end
+
+  # ... more code ...
+end
+```
+
+You can tell the injector what size to make the pages like this:
+
+```ruby
+objectify.values :page_size => 20
+```
+
+Finally, you can tell objectify about `resolvers`. Resolvers are objects that know how to fulfill parameters. For example, several of the above methods have parameters named `current_user`. Here's how to create a custom resolver for it that'll automatically get found by name.
 
 ```ruby
 # app/resolvers/current_user_resolver.rb
@@ -154,6 +194,18 @@ class CurrentUserResolver
     @user_finder.find_by_id(session[:current_user_id])
   end
 end
+```
+
+If you wanted to explicitly configure that resolver, you'd do it like this:
+
+```ruby
+objectify.resolvers :current_user => :current_user
+```
+
+If that resolver was in the namespace ObjectifyAuth, you'd configure it like this:
+
+```ruby
+objectify.resolvers :current_user => "objectify_auth/current_user"
 ```
 
 ### Why did you constructor-inject the User constant in to the CurrentUserResolver?
