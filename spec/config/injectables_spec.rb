@@ -37,4 +37,12 @@ describe "Objectify::Config::Injectables" do
     @injectables.context = @context
     @injectables.get(:controller).should == [:value, :something]
   end
+
+  it "accepts decorators" do
+    @injectables.add_decorators(:base, :decorator1)
+    @injectables.decorators(:base).should == [:decorator1]
+    @injectables.add_decorators(:base, [:decorator1, :decorator2])
+    @injectables.decorators(:base).should == [:decorator1, :decorator2]
+    @injectables.decorators(:nonexistent).should == []
+  end
 end

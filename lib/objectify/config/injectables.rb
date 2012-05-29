@@ -6,6 +6,7 @@ module Objectify
 
       def initialize(config = {})
         @config = config
+        @decorators = {}
       end
 
       def add_resolver(name, value)
@@ -22,6 +23,14 @@ module Objectify
 
       def get(name)
         @config[name] || context[name] || [:unknown, name]
+      end
+
+      def add_decorators(name, value)
+        @decorators[name] = value
+      end
+
+      def decorators(name)
+        [*@decorators[name]].compact
       end
 
       def context
