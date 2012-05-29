@@ -8,7 +8,9 @@ require "objectify/executor"
 module Objectify
   module Config
     class Context
-      DONT_RELOAD = [:@objectify_controller].freeze
+      DONT_RELOAD = [:@objectify_controller,
+                     :@policies_factory,
+                     :@action_factory].freeze
 
       attr_reader :policy_responders, :defaults, :actions, :policies
       attr_writer :injector, :instantiator, :executor,
@@ -17,18 +19,18 @@ module Objectify
       def initialize(policies_factory = Policies, action_factory = Action)
         @policies_factory = policies_factory
         @action_factory   = action_factory
+      end
 
-        @policy_responders = {}
-        @defaults = {}
-        @actions = {}
+      def policy_responders
+        @policy_responders ||= {}
       end
 
       def append_policy_responders(responders)
-        @policy_responders.merge!(responders)
+        policy_responders.merge!(responders)
       end
 
       def policy_responder(policy)
-        @policy_responders[policy] ||
+        policy_responders[policy] ||
           raise(ArgumentError, "Can't find a responder for #{policy}.")
       end
 
@@ -40,17 +42,21 @@ module Objectify
         @policies = @policies_factory.new(defaults)
       end
 
+      def actions
+        @actions ||= {}
+      end
+
       def append_action(action)
-        @actions[action.route] = action
+        actions[action.route] = action
       end
 
       def action(route)
-        @actions[route] ||
+        actions[route] ||
           raise(ArgumentError, "No action matching #{route} was found.")
       end
 
       def legacy_action(route)
-        @actions[route] ||
+        actions[route] ||
           @action_factory.new(route.resource, route.action, {}, policies)
       end
 
