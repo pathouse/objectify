@@ -4,24 +4,40 @@ module Objectify
   class Injector
     include Instrumentation
 
-    def initialize(resolver_locator)
-      @resolver_locator = resolver_locator
+    attr_writer :config
+
+    def initialize(config)
+      @config = config
     end
 
     def call(object, method)
       payload = {:object => object, :method => method}
       instrument("inject.objectify", payload) do |payload|
         method_obj           = method_object(object, method)
-        resolvers            = method_obj.parameters.map do |reqd, name|
-          @resolver_locator.call(name) if reqd == :req
+        injectables          = method_obj.parameters.map do |reqd, name|
+          @config.get(name) if reqd == :req
         end.compact
-        arguments            = resolvers.map do |resolver|
-          call(resolver, :call)
+        arguments            = injectables.map do |type, value|
+          if type == :unknown
+            type, value = unknown_value_to_injectable(value)
+          end
+
+          if type == :resolver
+            resolver_klass = [value, :resolver].join("_").classify.constantize
+            call(call(resolver_klass, :new), :call)
+          elsif type == :implementation
+            implementation_klass = value.to_s.classify.constantize
+            call(implementation_klass, :new)
+          elsif type == :value
+            value
+          else
+            raise ArgumentError, "Unknown injectable type: #{type}."
+          end
         end
 
-        payload[:parameters] = method_obj.parameters
-        payload[:resolvers]  = resolvers
-        payload[:arguments]  = arguments
+        payload[:parameters]  = method_obj.parameters
+        payload[:injectables] = injectables
+        payload[:arguments]   = arguments
 
         object.send(method, *arguments)
       end
@@ -34,6 +50,18 @@ module Objectify
         else
           object.method(method)
         end
+      end
+
+      def unknown_value_to_injectable(value)
+        [nil, :resolver].each do |suffix|
+          begin
+            [value, suffix].compact.join("_").classify.constantize
+            return [suffix.nil? ? :implementation : suffix, value]
+          rescue NameError => e
+          end
+        end
+
+        raise ArgumentError, "Can't figure out how to inject #{value}."
       end
   end
 end
