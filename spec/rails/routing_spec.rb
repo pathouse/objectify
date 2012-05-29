@@ -8,7 +8,9 @@ describe "Objectify::Rails::Routing::ObjectifyMapper" do
                                           :append_defaults          => nil,
                                           :append_action            => nil,
                                           :policies  => @policies,
-                                          :append_resolutions       => nil,
+                                          :append_implementations   => nil,
+                                          :append_resolvers         => nil,
+                                          :append_values            => nil,
                                           :objectify_controller => "some_controller")
     @rails_mapper   = stub("RailsMapper", :resources => nil,
                                           :match     => nil)
@@ -138,14 +140,25 @@ describe "Objectify::Rails::Routing::ObjectifyMapper" do
     end
   end
 
-  context "adding resolutions" do
-    before do
+  context "adding injector config" do
+    it "hands resolvers to the context" do
       @opts = { :authenticated => :unauthenticated_responder }
-      @mapper.resolutions @opts
+      @mapper.resolvers @opts
+      @objectify.should have_received(:append_resolvers).
+                          with(@opts)
     end
 
-    it "hands them to the context" do
-      @objectify.should have_received(:append_resolutions).
+    it "hands implementations to the context" do
+      @opts = { :authenticated => :unauthenticated_responder }
+      @mapper.implementations @opts
+      @objectify.should have_received(:append_implementations).
+                          with(@opts)
+    end
+
+    it "hands values to the context" do
+      @opts = { :authenticated => :unauthenticated_responder }
+      @mapper.values @opts
+      @objectify.should have_received(:append_values).
                           with(@opts)
     end
   end

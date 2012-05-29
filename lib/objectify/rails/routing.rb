@@ -38,8 +38,16 @@ module Objectify
           @application.objectify.append_policy_responders(options)
         end
 
-        def resolutions(options)
-          @application.objectify.append_resolutions(options)
+        def implementations(options)
+          @application.objectify.append_implementations(options)
+        end
+
+        def resolvers(options)
+          @application.objectify.append_resolvers(options)
+        end
+
+        def values(options)
+          @application.objectify.append_values(options)
         end
 
         def legacy_action(controller, actions, options)
