@@ -86,10 +86,6 @@ module Objectify
         end
       end
 
-      def resolvers
-        @resolvers ||= NamedValueResolverLocator.new(NameTranslationResolver)
-      end
-
       def instantiator
         @instantiator ||= Instantiator.new(injector)
       end
