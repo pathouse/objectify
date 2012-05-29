@@ -14,11 +14,9 @@ module Objectify
           parameters = event.payload[:parameters].map do |req, param|
             param if req == :req
           end.compact
-          resolvers  = Hash[*parameters.zip(event.payload[:resolvers].map(&:class)).flatten]
           arguments  = event.payload[:arguments].map(&:class).inspect[1..-2]
 
           message = "      [Injector] Invoking #{object}.#{method}(#{arguments}). "
-          message << "Resolutions: #{resolvers}. " if !resolvers.empty?
           message << duration(event)
 
           logger.debug(message)
