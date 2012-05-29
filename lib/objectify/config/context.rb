@@ -86,6 +86,12 @@ module Objectify
         end
       end
 
+      def append_decorators(opts)
+        opts.each do |k,v|
+          injectables.add_decorators(k, v)
+        end
+      end
+
       def instantiator
         @instantiator ||= Instantiator.new(injector)
       end

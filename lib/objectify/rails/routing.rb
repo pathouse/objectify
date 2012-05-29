@@ -50,6 +50,10 @@ module Objectify
           @application.objectify.append_values(options)
         end
 
+        def decorators(options)
+          @application.objectify.append_decorators(options)
+        end
+
         def legacy_action(controller, actions, options)
           [*actions].each { |action_name| append_action(controller, action_name, options) }
         end

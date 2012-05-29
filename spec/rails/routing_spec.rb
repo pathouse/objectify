@@ -11,6 +11,7 @@ describe "Objectify::Rails::Routing::ObjectifyMapper" do
                                           :append_implementations   => nil,
                                           :append_resolvers         => nil,
                                           :append_values            => nil,
+                                          :append_decorators        => nil,
                                           :objectify_controller => "some_controller")
     @rails_mapper   = stub("RailsMapper", :resources => nil,
                                           :match     => nil)
@@ -159,6 +160,13 @@ describe "Objectify::Rails::Routing::ObjectifyMapper" do
       @opts = { :authenticated => :unauthenticated_responder }
       @mapper.values @opts
       @objectify.should have_received(:append_values).
+                          with(@opts)
+    end
+
+    it "hands decorators to the context" do
+      @opts = { :base => :decorator }
+      @mapper.decorators @opts
+      @objectify.should have_received(:append_decorators).
                           with(@opts)
     end
   end
