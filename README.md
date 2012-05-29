@@ -229,6 +229,61 @@ describe "CurrentUserResolver" do
 end
 ```
 
+### Decorators
+
+Decorators are a great way to create truly modular and composable software. Here's a great example.
+
+In objectify\_auth, there's a SessionsCreateService that you can use as the basis for the creat action in your /sessions resource. By default, it does very little:
+
+```ruby
+class SessionsCreateService
+  def initialize(authenticator, session_creator)
+    @authenticator = authenticator
+    @session_creator = session_creator
+  end
+
+  def call(params, session)
+    @authenticator.call(params[:email], params[:password]).tap do |user|
+      @session_creator.call(session) if user
+    end
+  end
+end
+```
+
+Let's say we wanted to add remember token issuance. We could rewrite the entire SessionsCreationService or extend (with inheritance) it to do that, but then we'd have to retest the whole unit again. A decorator allows us to avoid that:
+
+```ruby
+class SessionsCreateServiceWithRememberToken
+  def initialize(sessions_create_service, remember_token_generator)
+    @sessions_create_service = sessions_create_service
+    @remember_token_generator = remember_token_generator
+  end
+
+  def call(params, session, cookies)
+    @sessions_create_service.call(params, session).tap do |user|
+      if user
+        token = @remember_token_generator.call(user)
+        cookies[:remember_token] = { ... }
+      end
+    end
+  end
+end
+```
+
+This makes for a very simple and easy to test extension to our SessionsCreateService. We can tell objectify to use this decorator like this:
+
+```ruby
+# config/routes.rb
+objectify.decorators :sessions_create_service => :sessions_create_service_with_remember_token
+```
+
+If we wanted to specify additional decorators, it'd look like this:
+
+```ruby
+# config/routes.rb
+objectify.decorators :sessions_create_service => [:sessions_create_service_with_remember_token, :sessions_create_service_with_captcha_verification]
+```
+
 ## Views
 
 Objectify has two major impacts on your views.
