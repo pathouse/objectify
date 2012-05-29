@@ -8,6 +8,7 @@ module Objectify
 
     def initialize(config)
       @config = config
+      @decoration_context = {}
     end
 
     def call(object, method)
@@ -15,7 +16,7 @@ module Objectify
       instrument("inject.objectify", payload) do |payload|
         method_obj           = method_object(object, method)
         injectables          = method_obj.parameters.map do |reqd, name|
-          @config.get(name) if reqd == :req
+          @decoration_context[name] || @config.get(name) if reqd == :req
         end.compact
         arguments            = injectables.map do |type, value|
           if type == :unknown
@@ -39,7 +40,19 @@ module Objectify
         payload[:injectables] = injectables
         payload[:arguments]   = arguments
 
-        object.send(method, *arguments)
+        result = object.send(method, *arguments)
+        if method == :new
+          base_name = object.name.underscore.to_sym
+          add_decoration_context(base_name, result)
+          result = @config.decorators(base_name).inject(result) do |memo, decorator|
+            call(decorator.to_s.classify.constantize, :new).tap do |decorated|
+              add_decoration_context(base_name, decorated)
+            end
+          end
+          clear_decoration_context
+        end
+
+        result
       end
     end
 
@@ -62,6 +75,14 @@ module Objectify
         end
 
         raise ArgumentError, "Can't figure out how to inject #{value}."
+      end
+
+      def add_decoration_context(name, object)
+        @decoration_context[name] = [:value, object]
+      end
+
+      def clear_decoration_context
+        @decoration_context.clear
       end
   end
 end

@@ -40,7 +40,7 @@ describe "Objectify::Injector" do
   end
 
   before do
-    @config = stub("Config", :get => nil)
+    @config = stub("Config", :get => nil, :decorators => [])
     @injector = Objectify::Injector.new(@config)
   end
 
@@ -97,6 +97,42 @@ describe "Objectify::Injector" do
       @config.stubs(:get).with(:something).returns([:value, :SOMETHING])
       obj = MyInjectedClass.new(nil)
       @injector.call(obj, :requires_params).call.should == :SOMETHING
+    end
+  end
+
+  class ToBeDecorated
+  end
+
+  class Decorator1
+    attr_reader :to_be_decorated
+
+    def initialize(to_be_decorated)
+      @to_be_decorated = to_be_decorated
+    end
+  end
+
+  class Decorator2
+    attr_reader :to_be_decorated
+
+    def initialize(to_be_decorated)
+      @to_be_decorated = to_be_decorated
+    end
+  end
+
+  context "decorating an object" do
+    before do
+      decorators = [:decorator1, :decorator2]
+      @config.stubs(:decorators).with(:to_be_decorated).returns(decorators)
+      @result = @injector.call(ToBeDecorated, :new)
+    end
+
+    it "decorates left to right" do
+      @result.should be_instance_of(Decorator2)
+      @result.to_be_decorated.should be_instance_of(Decorator1)
+      @result.to_be_decorated.to_be_decorated.should be_instance_of(ToBeDecorated)
+
+      @config.stubs(:decorators).with(:to_be_decorated).returns([])
+      @injector.call(ToBeDecorated, :new).should be_instance_of(ToBeDecorated)
     end
   end
 end
