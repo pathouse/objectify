@@ -43,13 +43,8 @@ module Objectify
         end
 
         def objectify_route
-          @objectify_route ||= if params[:objectify]
-            Objectify::Route.new(params[:objectify][:resource].to_sym,
-                                 params[:action].to_sym)
-          else
-            Objectify::Route.new(params[:controller].to_sym,
-                                 params[:action].to_sym)
-          end
+          resource_name = params[:objectify] ? params[:objectify][:resource] : params[:controller]
+          @objectify_route ||= Objectify::Route.new(resource_name.to_sym, params[:action].to_sym)
         end
 
         def action
