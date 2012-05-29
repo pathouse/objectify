@@ -1,4 +1,4 @@
-require "objectify/resolver_locator"
+require "objectify/config/policies"
 require "objectify/executor"
 require "objectify/policy_chain_executor"
 require "objectify/instrumentation"
@@ -20,17 +20,17 @@ module Objectify
           objectify.injector
         end
 
-        def request_resolver
-          klass = Objectify::NamedValueResolverLocator
-          @request_resolver ||= klass.new.tap do |resolver|
-            resolver.add(:controller, self)
-            resolver.add(:params, params)
-            resolver.add(:session, session)
-            resolver.add(:cookies, cookies)
-            resolver.add(:request, request)
-            resolver.add(:response, response)
-            resolver.add(:flash, flash)
-            resolver.add(:renderer, Renderer.new(self))
+        def request_injectables_context
+          klass = Objectify::Config::Injectables
+          @request_injectables_context ||= klass.new.tap do |injectables_context|
+            injectables_context.add_value(:controller, self)
+            injectables_context.add_value(:params, params)
+            injectables_context.add_value(:session, session)
+            injectables_context.add_value(:cookies, cookies)
+            injectables_context.add_value(:request, request)
+            injectables_context.add_value(:response, response)
+            injectables_context.add_value(:flash, flash)
+            injectables_context.add_value(:renderer, Renderer.new(self))
           end
         end
         
@@ -65,14 +65,14 @@ module Objectify
         end
 
         def objectify_around_filter
-          objectify.resolver_locator.context(request_resolver)
+          objectify.injectables.context = request_injectables_context
           yield
-          objectify.resolver_locator.clear_context
+          objectify.injectables.context = nil
         end
 
         def execute_objectify_action
           service_result = objectify_executor.call(action.service, :service)
-          request_resolver.add(:service_result, service_result)
+          request_injectables_context.add_value(:service_result, service_result)
 
           objectify_executor.call(action.responder, :responder)
         end
