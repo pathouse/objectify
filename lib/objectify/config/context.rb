@@ -1,9 +1,8 @@
 require "objectify/config/action"
+require "objectify/config/injectables"
 require "objectify/config/policies"
 require "objectify/injector"
 require "objectify/instantiator"
-require "objectify/resolver"
-require "objectify/resolver_locator"
 require "objectify/executor"
 
 module Objectify
@@ -12,8 +11,8 @@ module Objectify
       DONT_RELOAD = [:@objectify_controller].freeze
 
       attr_reader :policy_responders, :defaults, :actions, :policies
-      attr_writer :injector, :resolver_locator, :instantiator, :executor,
-                  :resolvers, :injectables, :objectify_controller
+      attr_writer :injector, :instantiator, :executor,
+                  :injectables, :objectify_controller
 
       def initialize(policies_factory = Policies, action_factory = Action)
         @policies_factory = policies_factory
@@ -56,33 +55,33 @@ module Objectify
       end
 
       def injector
-        @injector ||= Injector.new(resolver_locator)
+        @injector ||= Injector.new(injectables)
+      end
+
+      def injectables
+        @injectables ||= Injectables.new
+      end
+
+      def append_values(opts)
+        opts.each do |k,v|
+          injectables.add_value(k, v)
+        end
+      end
+
+      def append_implementations(opts)
+        opts.each do |k,v|
+          injectables.add_implementation(k, v)
+        end
       end
 
       def append_resolvers(opts)
         opts.each do |k,v|
-          resolvers.add(k, v)
-        end
-      end
-
-      def append_injectables(opts)
-        opts.each do |k,v|
-          injectables.add(k, v)
+          injectables.add_resolver(k, v)
         end
       end
 
       def resolvers
         @resolvers ||= NamedValueResolverLocator.new(NameTranslationResolver)
-      end
-
-      def injectables
-        @injectables ||= NamedValueResolverLocator.new
-      end
-
-      def resolver_locator
-        @resolver_locator ||= MultiResolverLocator.new(
-                                [injectables, resolvers, ConstResolverLocator.new]
-                              )
       end
 
       def instantiator

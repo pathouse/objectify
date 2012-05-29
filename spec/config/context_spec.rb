@@ -70,32 +70,6 @@ describe "Objectify::Config::Context" do
     end
   end
 
-  context "appending resolvers" do
-    before do
-      @resolvers = stub("ResolverLocator", :add => nil)
-      @context   = Objectify::Config::Context.new(nil)
-      @context.resolvers = @resolvers
-      @context.append_resolvers :something => String.new
-    end
-
-    it "adds them to a locator it has" do
-      @resolvers.should have_received(:add).with(:something, String.new)
-    end
-  end
-
-  context "appending injectables" do
-    before do
-      @injectables = stub("ResolverLocator", :add => nil)
-      @context     = Objectify::Config::Context.new(nil)
-      @context.injectables = @injectables
-      @context.append_injectables :something => String.new
-    end
-
-    it "adds them to a locator it has" do
-      @injectables.should have_received(:add).with(:something, String.new)
-    end
-  end
-
   context "the legacy_action" do
     before do
       @action = stub("Action")
