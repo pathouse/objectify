@@ -106,6 +106,7 @@ module Objectify
     end
 
     class ObjectifyController < ActionController::Base
+      around_filter :objectify_around_filter
       include ControllerBehaviour
     end
   end
