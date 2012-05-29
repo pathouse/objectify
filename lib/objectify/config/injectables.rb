@@ -2,6 +2,7 @@ module Objectify
   module Config
     class Injectables
       attr_reader :config
+      attr_writer :context
 
       def initialize(config = {})
         @config = config
@@ -20,7 +21,11 @@ module Objectify
       end
 
       def get(name)
-        @config[name] || [:unknown, name]
+        @config[name] || context[name] || [:unknown, name]
+      end
+
+      def context
+        @context && @context.config || {}
       end
 
       def merge(other)

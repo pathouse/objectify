@@ -30,4 +30,11 @@ describe "Objectify::Config::Injectables" do
     @injectables2 = Objectify::Config::Injectables.new :a => [:implementation, :c]
     @injectables.merge(@injectables2).get(:a).should == [:implementation, :c]
   end
+
+  it "accepts a context that it falls back to" do
+    @context = Objectify::Config::Injectables.new
+    @context.add_value :controller, :something
+    @injectables.context = @context
+    @injectables.get(:controller).should == [:value, :something]
+  end
 end
