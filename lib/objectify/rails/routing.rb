@@ -30,6 +30,17 @@ module Objectify
           end
         end
 
+        def match(options)
+          from,to = options.detect { |k,v| k.is_a?(String) }
+          controller = @application.objectify.objectify_controller
+          @rails_mapper.match from      => "#{controller}#action",
+                              :defaults => {
+            :objectify => {:resource => from}
+          }
+
+          append_action(from, nil, options)
+        end
+
         def defaults(options)
           @application.objectify.append_defaults(options)
         end

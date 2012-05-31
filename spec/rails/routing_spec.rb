@@ -98,6 +98,52 @@ describe "Objectify::Rails::Routing::ObjectifyMapper" do
     end
   end
 
+  context "#match" do
+    before do
+      @opts = { "/pictures" => "pictures#create" }
+      @mapper.match @opts
+    end
+
+    it "correctly adds the resource to the rails mapper" do
+      opts = { "/pictures" => "#{@objectify.objectify_controller}#action",
+               :defaults   => {:objectify => {:resource => "/pictures"}}}
+      @rails_mapper.should have_received(:match).with(opts)
+    end
+
+    it "creates an action" do
+      @action_factory.should have_received(:new).
+              with("/pictures", nil, @opts, @policies)
+    end
+
+    it "appends each of the actions to the objectify object" do
+      @objectify.should have_received(:append_action).
+                          with(@action).times(1)
+    end
+  end
+
+  context "#match with overrides" do
+    before do
+      @opts = { "/pictures" => "pictures#create", :service => :pics }
+      @mapper.match @opts
+    end
+
+    it "correctly adds the resource to the rails mapper" do
+      opts = { "/pictures" => "#{@objectify.objectify_controller}#action",
+               :defaults   => {:objectify => {:resource => "/pictures"}}}
+      @rails_mapper.should have_received(:match).with(opts)
+    end
+
+    it "creates an action" do
+      @action_factory.should have_received(:new).
+              with("/pictures", nil, @opts, @policies)
+    end
+
+    it "appends each of the actions to the objectify object" do
+      @objectify.should have_received(:append_action).
+                          with(@action).times(1)
+    end
+  end
+
   context "adding a resource with an alternative objectify_controller" do
     before do
       @objectify.stubs(:objectify_controller).returns("asdfbsdf")
