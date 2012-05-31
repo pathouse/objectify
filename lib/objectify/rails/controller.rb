@@ -43,8 +43,9 @@ module Objectify
         end
 
         def objectify_route
-          resource_name = params[:objectify] ? params[:objectify][:resource] : params[:controller]
-          @objectify_route ||= Objectify::Route.new(resource_name.to_sym, params[:action].to_sym)
+          routing_options = params[:objectify] ? params[:objectify] : {:controller => params[:controller].to_sym, :action => params[:action].to_sym}
+          routing_options.merge!(:action => params[:action]) if routing_options.delete(:append_action)
+          @objectify_route ||= Objectify::Route.new(routing_options)
         end
 
         def action

@@ -76,7 +76,8 @@ describe "Objectify::Config::Context" do
       @action_factory = stub("ActionFactory", :new => @action)
       @policies = stub("Policies")
       @policies_factory = stub("PoliciesFactory", :new => @policies)
-      @route = stub("Route", :resource => :controller, :action => :action)
+      @route_opts = {:controller => :controller, :action => :action}
+      @route = stub("Route", :opts => @route_opts)
 
       @context = Objectify::Config::Context.new(@policies_factory, @action_factory)
     end
@@ -88,7 +89,9 @@ describe "Objectify::Config::Context" do
 
       it "creates a new action with the controller and action name and its policies" do
         @action_factory.should have_received(:new).
-                                with(:controller, :action, {}, @policies)
+                                with(@route_opts,
+                                     :controller,
+                                     :action, {}, @policies)
       end
     end
 

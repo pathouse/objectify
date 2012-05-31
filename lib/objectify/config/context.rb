@@ -57,7 +57,7 @@ module Objectify
 
       def legacy_action(route)
         actions[route] ||
-          @action_factory.new(route.resource, route.action, {}, policies)
+          @action_factory.new(route.opts, route.opts[:controller], route.opts[:action], {}, policies)
       end
 
       def injector
