@@ -6,7 +6,7 @@ module Objectify
     module Routing
       RESOURCE_ACTIONS = [:index, :show, :new, :create,
                           :edit, :update, :destroy].freeze
-      OBJECTIFY_OPTIONS = [:policies, :service].freeze
+      OBJECTIFY_OPTIONS = [:policies, :service, :skip_policies].freeze
 
       class ObjectifyMapper
         def initialize(rails_mapper,

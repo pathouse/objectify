@@ -139,7 +139,7 @@ describe "Objectify::Rails::Routing::ObjectifyMapper" do
     before do
       @routing_info = {"path" => "/pictures"}
       @opts = { "/pictures" => "pictures#create" }
-      @objectify_opts = {:service => :pics}
+      @objectify_opts = {:service => :pics, :skip_policies => :an}
       @opts.merge!(@objectify_opts)
 
       @mapper.match @opts
