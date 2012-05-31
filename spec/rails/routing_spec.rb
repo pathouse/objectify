@@ -26,6 +26,9 @@ describe "Objectify::Rails::Routing::ObjectifyMapper" do
 
   context "adding a resource" do
     before do
+      @rails_routing_info = {:resource => :pictures,
+                             :append_action => true}
+      @objectify_routing_info = {:resource => :pictures}
       @mapper.resources(:pictures, :policies => :some_policy,
                                    :create   => {
                                       :policies => :blocked_user,
@@ -35,7 +38,7 @@ describe "Objectify::Rails::Routing::ObjectifyMapper" do
 
     it "correctly adds the resource to the rails mapper" do
       opts = { :controller => @objectify.objectify_controller,
-               :defaults   => {:objectify => {:resource => :pictures}}}
+               :defaults   => {:objectify => @rails_routing_info}}
       @rails_mapper.should have_received(:resources).
                             with(:pictures, opts)
     end
@@ -49,8 +52,13 @@ describe "Objectify::Rails::Routing::ObjectifyMapper" do
         :policies => :some_policy
       }
       Objectify::Rails::Routing::RESOURCE_ACTIONS.each do |action|
+        routing_info = @objectify_routing_info.merge(:action => action)
         @action_factory.should have_received(:new).
-                                with(:pictures, action, opts, @policies)
+                                with(routing_info,
+                                     :pictures,
+                                     action,
+                                     opts,
+                                     @policies)
       end
     end
 
@@ -62,6 +70,9 @@ describe "Objectify::Rails::Routing::ObjectifyMapper" do
 
   context "adding a resource with its own defaults" do
     before do
+      @rails_routing_info = {:resource => :pictures,
+                             :append_action => true}
+      @objectify_routing_info = {:resource => :pictures}
       @mapper.resources(:pictures, :policies => :some_policy,
                                    :create   => {
                                       :policies => :blocked_user,
@@ -72,7 +83,7 @@ describe "Objectify::Rails::Routing::ObjectifyMapper" do
 
     it "correctly adds the resource to the rails mapper" do
       opts = { :controller => @objectify.objectify_controller,
-               :defaults   => {:objectify => {:resource => :pictures},
+               :defaults   => {:objectify => @rails_routing_info,
                                :some      => :bullshit}}
       @rails_mapper.should have_received(:resources).
                             with(:pictures, opts)
@@ -87,8 +98,10 @@ describe "Objectify::Rails::Routing::ObjectifyMapper" do
         :policies => :some_policy
       }
       Objectify::Rails::Routing::RESOURCE_ACTIONS.each do |action|
+        routing_info = @objectify_routing_info.merge(:action => action)
         @action_factory.should have_received(:new).
-                                with(:pictures, action, opts, @policies)
+                                with(routing_info,
+                                     :pictures, action, opts, @policies)
       end
     end
 
@@ -100,19 +113,20 @@ describe "Objectify::Rails::Routing::ObjectifyMapper" do
 
   context "#match" do
     before do
+      @routing_info = {:path => "/pictures"}
       @opts = { "/pictures" => "pictures#create" }
       @mapper.match @opts
     end
 
     it "correctly adds the resource to the rails mapper" do
       opts = { "/pictures" => "#{@objectify.objectify_controller}#action",
-               :defaults   => {:objectify => {:resource => "/pictures"}}}
+               :defaults   => {:objectify => @routing_info}}
       @rails_mapper.should have_received(:match).with(opts)
     end
 
     it "creates an action" do
       @action_factory.should have_received(:new).
-              with("/pictures", nil, @opts, @policies)
+              with(@routing_info, :pictures, :create, {}, @policies)
     end
 
     it "appends each of the actions to the objectify object" do
@@ -123,19 +137,24 @@ describe "Objectify::Rails::Routing::ObjectifyMapper" do
 
   context "#match with overrides" do
     before do
-      @opts = { "/pictures" => "pictures#create", :service => :pics }
+      @routing_info = {:path => "/pictures"}
+      @opts = { "/pictures" => "pictures#create" }
+      @objectify_opts = {:service => :pics}
+      @opts.merge!(@objectify_opts)
+
       @mapper.match @opts
     end
 
     it "correctly adds the resource to the rails mapper" do
       opts = { "/pictures" => "#{@objectify.objectify_controller}#action",
-               :defaults   => {:objectify => {:resource => "/pictures"}}}
+               :defaults   => {:objectify => @routing_info}}
       @rails_mapper.should have_received(:match).with(opts)
     end
 
     it "creates an action" do
       @action_factory.should have_received(:new).
-              with("/pictures", nil, @opts, @policies)
+              with(@routing_info, :pictures, :create,
+                   @objectify_opts, @policies)
     end
 
     it "appends each of the actions to the objectify object" do
@@ -157,7 +176,8 @@ describe "Objectify::Rails::Routing::ObjectifyMapper" do
 
     it "correctly adds the resource to the rails mapper" do
       opts = { :controller => @objectify.objectify_controller,
-               :defaults   => {:objectify => {:resource => :pictures},
+               :defaults   => {:objectify => {:resource => :pictures,
+                                              :append_action => true},
                                :some      => :bullshit}}
       @rails_mapper.should have_received(:resources).
                             with(:pictures, opts)
@@ -224,11 +244,20 @@ describe "Objectify::Rails::Routing::ObjectifyMapper" do
     end
 
     it "creates actions for each of the specified actions" do
+      routing_opts = {:controller => :controller}
       @action_factory.should have_received(:new).
-                              with(:controller, :action1, @opts, @policies)
+                              with(routing_opts.merge(:action => :action1),
+                                   :controller,
+                                   :action1,
+                                   @opts,
+                                   @policies)
 
       @action_factory.should have_received(:new).
-                              with(:controller, :action2, @opts, @policies)
+                              with(routing_opts.merge(:action => :action2),
+                                   :controller,
+                                   :action2,
+                                   @opts,
+                                   @policies)
     end
 
     it "passes the actions to the objectify objects" do

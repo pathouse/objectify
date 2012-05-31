@@ -6,9 +6,10 @@ module Objectify
     class Action
       attr_reader :resource_name, :name, :route, :policies, :service, :responder
 
-      def initialize(resource_name, name, options, default_policies,
+      def initialize(routing_opts,
+                     resource_name, name, options, default_policies,
                      route_factory = Route)
-        @route = route_factory.new(resource_name, name)
+        @route = route_factory.new(routing_opts)
         @resource_name = resource_name
         @name = name
         @policies = default_policies.merge(options, options[name])

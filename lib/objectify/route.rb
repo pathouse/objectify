@@ -1,4 +1,4 @@
 module Objectify
-  class Route < Struct.new(:resource, :action)
+  class Route < Struct.new(:opts)
   end
 end

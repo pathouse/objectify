@@ -6,7 +6,7 @@ module Objectify
     module Routing
       RESOURCE_ACTIONS = [:index, :show, :new, :create,
                           :edit, :update, :destroy].freeze
-      OBJECTIFY_OPTIONS = [:policies].freeze
+      OBJECTIFY_OPTIONS = [:policies, :service].freeze
 
       class ObjectifyMapper
         def initialize(rails_mapper,
@@ -24,21 +24,29 @@ module Objectify
           rails_options     = options.merge(:controller => controller)
 
           args.each do |resource_name|
-            merged_defaults = objectify_defaults(resource_name, rails_options)
+            objectify_defaults = {:resource => resource_name}
+            merged_defaults = merge_defaults(objectify_defaults.merge(:append_action => true),
+                                             rails_options)
             @rails_mapper.resources(resource_name, merged_defaults)
-            RESOURCE_ACTIONS.each { |action_name| append_action(resource_name, action_name, objectify_options) }
+            RESOURCE_ACTIONS.each do |action_name|
+              append_action(objectify_defaults.merge(:action => action_name),
+                            resource_name,
+                            action_name,
+                            objectify_options)
+            end
           end
         end
 
         def match(options)
           from,to = options.detect { |k,v| k.is_a?(String) }
+          resource,action = to.split("#").map(&:to_sym)
           controller = @application.objectify.objectify_controller
-          @rails_mapper.match from      => "#{controller}#action",
-                              :defaults => {
-            :objectify => {:resource => from}
-          }
+          objectify_options = extract_objectify_options(options)
+          objectify_defaults = {:path => from}
+          rails_options = merge_defaults(objectify_defaults, options)
+          @rails_mapper.match rails_options.merge(from => "#{controller}#action")
 
-          append_action(from, nil, options)
+          append_action(objectify_defaults, resource, action, objectify_options)
         end
 
         def defaults(options)
@@ -66,7 +74,11 @@ module Objectify
         end
 
         def legacy_action(controller, actions, options)
-          [*actions].each { |action_name| append_action(controller, action_name, options) }
+          [*actions].each do |action_name|
+            routing_opts = {:controller => controller,
+                            :action     => action_name}
+            append_action(routing_opts, controller, action_name, options)
+          end
         end
 
         private
@@ -76,14 +88,15 @@ module Objectify
             end.compact.flatten]
           end
 
-          def objectify_defaults(resource_name, rails_options)
-            defaults = {:objectify => {:resource => resource_name}}
+          def merge_defaults(objectify_defaults, rails_options)
+            defaults = {:objectify => objectify_defaults}
             defaults = (rails_options[:defaults] || {}).merge(defaults)
             defaults = rails_options.merge(:defaults => defaults)
           end
 
-          def append_action(resource_name, action_name, options)
-            action = @action_factory.new(resource_name,
+          def append_action(routing_opts, resource_name, action_name, options)
+            action = @action_factory.new(routing_opts,
+                                         resource_name,
                                          action_name,
                                          options,
                                          @application.objectify.policies)

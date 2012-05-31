@@ -8,6 +8,8 @@ describe "Objectify::Config::Action" do
 
     @route            = stub("Route")
     @route_factory    = stub("RouteFactory", :new => @route)
+
+    @routing_opts = {:some => :route}
   end
 
   context "when everything is specified" do
@@ -23,7 +25,8 @@ describe "Objectify::Config::Action" do
         :index => @index_options
       }
 
-      @action = Objectify::Config::Action.new(:pictures,
+      @action = Objectify::Config::Action.new(@routing_opts,
+                                              :pictures,
                                               :index,
                                               @options,
                                               @default_policies,
@@ -31,7 +34,7 @@ describe "Objectify::Config::Action" do
     end
 
     it "creates and stores a route from the route factory" do
-      @route_factory.should have_received(:new).with(:pictures, :index)
+      @route_factory.should have_received(:new).with(@routing_opts)
       @action.route.should == @route
     end
 
@@ -61,7 +64,8 @@ describe "Objectify::Config::Action" do
   context "when nothing is specified" do
     before do
       @options = {}
-      @action = Objectify::Config::Action.new(:pictures,
+      @action = Objectify::Config::Action.new(@routing_opts,
+                                              :pictures,
                                               :index,
                                               @options,
                                               @default_policies,
