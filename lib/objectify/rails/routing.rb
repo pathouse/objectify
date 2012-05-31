@@ -42,7 +42,7 @@ module Objectify
           resource,action = to.split("#").map(&:to_sym)
           controller = @application.objectify.objectify_controller
           objectify_options = extract_objectify_options(options)
-          objectify_defaults = {:path => from}
+          objectify_defaults = {:path => from.dup}
           rails_options = merge_defaults(objectify_defaults, options)
           @rails_mapper.match rails_options.merge(from => "#{controller}#action")
 
