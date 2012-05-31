@@ -34,8 +34,8 @@ The second problem is how to handle multiple formats. One idea is to use the rai
 class SessionNewResponder
   include Objectify::Render
 
-  def call
-    FormattedResponse.new do |format|
+  def call(service_result)
+    FormattedResponse.new(:data => service_result) do |format|
       format.html
       format.js
     end
