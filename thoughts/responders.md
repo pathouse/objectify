@@ -45,6 +45,19 @@ end
 
 Or something like that. I'm not a huge fan of that syntax because it seems difficult to test, although maybe that's solved by making the result of the little DSL very simple.
 
+```ruby
+class SessionNewResponder
+  include Objectify::Render
+
+  def call(service_result)
+    FormattedResponse.new(:data => service_result) do |format|
+      format.html Template.new("somewhere.html.erb")
+      format.js
+    end
+  end
+end
+```
+
 After writing this, I'm starting to think it's the right approach.
 
 ## Other approaches?
