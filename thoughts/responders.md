@@ -74,11 +74,11 @@ class UnauthorizedResponse
   status 403
 
   def js(service_result, renderer)
-    renderer.template :name => "unauthorized.js.json_builder"
+    renderer.template :name => "unauthorized.js.json_builder", :data => service_result
   end
 
-  def any
-    renderer.template :name => "unauthorized.html.erb"
+  def any(service_result, renderer)
+    renderer.template :name => "unauthorized.html.erb", :data => service_result
   end
 end
 ```
