@@ -73,14 +73,14 @@ Objectify has two primary components:
       ```ruby
         class PicturesCreateResponder
           # service_result is exactly what it sounds like
-          def call(service_result, controller, renderer)
+          def call(service_result, renderer)
             if service_result.persisted?
               renderer.redirect_to service_result
             else
               # this is the only way that you can pass data to the view layer
               # and you can only pass one thing. Hint: use a presenter.
               renderer.data(service_result)
-              renderer.render :template => "pictures/edit.html.erb"
+              renderer.render :template => "pictures/new.html.erb"
             end
           end
         end
