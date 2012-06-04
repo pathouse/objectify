@@ -66,6 +66,7 @@ One idea I had this weekend, was to rename responders to responses. That way, co
 
 Also, I think we should use methods to respond to different content types. Can't believe it took me this long to think of this.
 
+```ruby
 class UnauthorizedResponse
   include Objectify::Response
 
@@ -80,6 +81,7 @@ class UnauthorizedResponse
     renderer.template :name => "unauthorized.html.erb"
   end
 end
+```
 
 ## Other approaches?
 
