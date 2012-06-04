@@ -60,6 +60,27 @@ end
 
 After writing this, I'm starting to think it's the right approach.
 
+## Rename to "Responses"?
+
+One idea I had this weekend, was to rename responders to responses. That way, conceptually, you're defining a type of response. I think that might be easier for people to think about.
+
+Also, I think we should use methods to respond to different content types. Can't believe it took me this long to think of this.
+
+class UnauthorizedResponse
+  include Objectify::Response
+
+  respond_with :html, :js
+  status 403
+
+  def js(service_result, renderer)
+    renderer.template :name => "unauthorized.js.json_builder"
+  end
+
+  def any
+    renderer.template :name => "unauthorized.html.erb"
+  end
+end
+
 ## Other approaches?
 
 * Something that can be tested mockist-style, perhaps? I have no idea what this would look like, though, really.
