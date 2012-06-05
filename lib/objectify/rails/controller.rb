@@ -102,6 +102,11 @@ module Objectify
 
         execute_objectify_action
       end
+
+      private
+        def view_assigns
+          {:_objectify_data => @objectify_service_result}
+        end
     end
 
     module ControllerBehaviour
@@ -119,6 +124,11 @@ module Objectify
           execute_objectify_action
         end
       end
+
+      private
+        def view_assigns
+          {:_objectify_data => @objectify_service_result}
+        end
     end
 
     class ObjectifyController < ActionController::Base
