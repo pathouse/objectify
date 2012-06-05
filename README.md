@@ -1,4 +1,4 @@
-# objectify
+# objectify [![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/bitlove/objectify)
 
 Objectify is a framework that codifies good object oriented design practices for building maintainable rails applications. For more on the motivations that led to objectify, check out this blog post: http://jamesgolick.com/2012/5/22/objectify-a-better-way-to-build-rails-applications.html
 
@@ -27,7 +27,7 @@ Objectify has two primary components:
       ```ruby
         class RequiresLoginPolicy
           # more on how current user gets injected below
-          def allowed?(current_user) 
+          def allowed?(current_user)
             !current_user.nil?
           end
         end
@@ -207,7 +207,7 @@ objectify.resolvers :current_user => "objectify_auth/current_user"
 ```
 
 ### Why did you constructor-inject the User constant in to the CurrentUserResolver?
-  
+
 Because that makes it possible to test in isolation.
 
 ```ruby
@@ -300,7 +300,7 @@ gem "objectify", "> 0"
 module MyApp
   class Application < Rails::Application
     # only have to require this if you want objectify logging
-    require "objectify/rails/log_subscriber" 
+    require "objectify/rails/log_subscriber"
     include Objectify::Rails::Application
   end
 end
