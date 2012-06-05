@@ -103,6 +103,14 @@ module Objectify
         execute_objectify_action
       end
 
+      def controller_path
+        action.resource_name
+      end
+
+      def action_name
+        action.name
+      end
+
       private
         def view_assigns
           {:_objectify_data => @objectify_service_result}
@@ -123,6 +131,14 @@ module Objectify
         if execute_policy_chain
           execute_objectify_action
         end
+      end
+
+      def controller_path
+        action.resource_name
+      end
+
+      def action_name
+        action.name
       end
 
       private
