@@ -73,8 +73,8 @@ module Objectify
         end
 
         def execute_objectify_action
-          service_result = objectify_executor.call(action.service, :service)
-          request_injectables_context.add_value(:service_result, service_result)
+          @objectify_service_result = objectify_executor.call(action.service, :service)
+          request_injectables_context.add_value(:service_result, @objectify_service_result)
 
           objectify_executor.call(action.responder, :responder)
           objectify_respond_if_response
