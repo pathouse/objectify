@@ -73,12 +73,80 @@ class UnauthorizedResponse
   respond_with :html, :js
   status 403
 
-  def js(service_result, renderer)
-    renderer.template :name => "unauthorized.js.json_builder", :data => service_result
+  def js
+    :default
   end
 
   def any(service_result, renderer)
     renderer.template :name => "unauthorized.html.erb", :data => service_result
+  end
+end
+```
+
+```ruby
+class PicturesCreateSuccessfulResponse
+  include Objectify::Response
+
+  when_policy :create_successful
+  respond_with :html, :js, :json
+
+  def html(service_result, renderer)
+    responder.redirect_to service_result
+  end
+
+  def js(service_result, renderer)
+    responder.redirect_to "xyz"
+  end
+end
+
+class PicturesCreateUnsuccessfulResponse
+  include Objectify::Response
+
+  when_not_policy :create_successful
+  respond_with :html, :js, :json
+
+  def html(service_result, renderer)
+    responder.redirect_to service_result
+  end
+
+  def js(service_result, renderer)
+    responder.redirect_to "xyz"
+  end
+end
+
+class PicturesCreateResponse < Objectify::Response
+  respond do |service_result, format|
+    if service_result.persisted?
+      format.html { redirect_to service_result }
+      format.js   { render :template => "pictures/show.json.json_builder" }
+      format.json { render :template => "pictures/show.json.json_builder" }
+    else
+      format.html { render :template => "pictures/new.html.erb" }
+      format.js   { render :json => { :errors => service_result.errors, :status => :unprocessable_entity } }
+      format.json { render :template => "pictures/show.json.json_builder" }
+    end
+  end
+end
+```
+
+Tests?
+
+```ruby
+describe "PicturesCreateResponse" do
+  before do
+    @format   = Objectify::FakeFormat.new
+    @response = PicturesCreateResponse.new
+  end
+
+  context "when create is successful" do
+    before do
+      @service_result = stub("Result", :persisted? => true)
+      @response.respond(@service_result, @format)
+    end
+
+    it "renders a template called 'pictures/new.html.erb' for html" do
+      @response.should render_template("pictures/new.html.erb")
+    end
   end
 end
 ```
