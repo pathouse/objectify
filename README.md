@@ -37,10 +37,8 @@ Objectify has two primary components:
 
       ```ruby
         class UnauthenticatedResponder
-          # yes, at some point we probably need a better interface
-          # for handling responses, but this'll do for now.
-          def call(controller, renderer)
-            renderer.redirect_to controller.login_url
+          def call(format, routes)
+            format.any { redirect_to routes.login_url }
           end
         end
       ```
@@ -73,14 +71,14 @@ Objectify has two primary components:
       ```ruby
         class PicturesCreateResponder
           # service_result is exactly what it sounds like
-          def call(service_result, renderer)
+          def call(service_result, format)
             if service_result.persisted?
-              renderer.redirect_to service_result
+              format.any { redirect_to service_result }
             else
-              # this is the only way that you can pass data to the view layer
-              # and you can only pass one thing. Hint: use a presenter.
-              renderer.data(service_result)
-              renderer.render :template => "pictures/new.html.erb"
+              # the service_result is always the only thing passed to the view
+              # (hint: use a presenter)
+              # you can access it with the `objectify_data` helper.
+              format.any { render :template => "pictures/new.html.erb" }
             end
           end
         end
