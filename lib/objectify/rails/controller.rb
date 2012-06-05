@@ -97,7 +97,7 @@ module Objectify
         klass.helper_method(:objectify_executor) if klass.respond_to?(:helper_method)
       end
 
-      def method_missing(name, *args, &block)
+      def action_missing(name, *args, &block)
         instrument("start_processing.objectify", :route => objectify_route)
 
         execute_objectify_action
@@ -117,7 +117,7 @@ module Objectify
         klass.helper_method(:objectify_executor) if klass.respond_to?(:helper_method)
       end
 
-      def method_missing(name, *args, &block)
+      def action_missing(name, *args, &block)
         instrument("start_processing.objectify", :route => objectify_route)
 
         if execute_policy_chain
