@@ -31,7 +31,12 @@ module Objectify
             injectables_context.add_value(:response, response)
             injectables_context.add_value(:flash, flash)
             injectables_context.add_value(:renderer, Renderer.new(self))
+            injectables_context.add_value(:format, objectify_response_collector)
           end
+        end
+
+        def objectify_response_collector
+          @objectify_response_collector ||= ActionController::MimeResponds::Collector.new { default_response }
         end
         
         def objectify_executor
@@ -58,6 +63,7 @@ module Objectify
 
         def execute_policy_chain
           policy_chain_executor.call(action)
+          objectify_respond_if_response
         end
 
         def objectify_around_filter
@@ -71,6 +77,15 @@ module Objectify
           request_injectables_context.add_value(:service_result, service_result)
 
           objectify_executor.call(action.responder, :responder)
+          objectify_respond_if_response
+        end
+
+        def objectify_respond_if_response
+          if format = request.negotiate_mime(objectify_response_collector.order)
+            self.content_type ||= format.to_s
+            lookup_context.freeze_formats([format.to_sym])
+            instance_eval &objectify_response_collector.response_for(format)
+          end
         end
     end
 
