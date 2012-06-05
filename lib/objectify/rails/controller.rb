@@ -3,6 +3,7 @@ require "objectify/executor"
 require "objectify/policy_chain_executor"
 require "objectify/instrumentation"
 require "objectify/rails/renderer"
+require "objectify/rails/routes"
 
 module Objectify
   module Rails
@@ -20,6 +21,12 @@ module Objectify
           objectify.injector
         end
 
+        def objectify_routes
+          @objectify_routes ||= Routes.new.tap do |routes|
+            routes.default_url_options = url_options
+          end
+        end
+
         def request_injectables_context
           klass = Objectify::Config::Injectables
           @request_injectables_context ||= klass.new.tap do |injectables_context|
@@ -32,6 +39,7 @@ module Objectify
             injectables_context.add_value(:flash, flash)
             injectables_context.add_value(:renderer, Renderer.new(self))
             injectables_context.add_value(:format, objectify_response_collector)
+            injectables_context.add_value(:routes, objectify_routes)
           end
         end
 
