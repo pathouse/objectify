@@ -299,8 +299,6 @@ gem "objectify", "> 0"
 # config/application.rb
 module MyApp
   class Application < Rails::Application
-    require "objectify/rails/application"
-    require "objectify/rails/controller"
     # only have to require this if you want objectify logging
     require "objectify/rails/log_subscriber" 
     include Objectify::Rails::Application
