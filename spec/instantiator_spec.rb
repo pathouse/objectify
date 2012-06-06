@@ -2,21 +2,48 @@ require "spec_helper"
 require "objectify/instantiator"
 
 describe "Objectify::Instantiator" do
-  class MyService
+  module My
+    class Service
+    end
+  end
+
+  class MyPolicy
   end
 
   before do
-    @service      = MyService.new
-    @injector     = stub("Injector", :call => @service)
+    @injector     = stub("Injector")
     @instantiator = Objectify::Instantiator.new(@injector)
-    @result       = @instantiator.call(:my, :service)
   end
 
-  it "returns the result of injector#call" do
-    @result.should == @service
+  context "with a service" do
+    before do
+      @service = My::Service.new
+      @injector.stubs(:call).returns(@service)
+      @result = @instantiator.call(:my, :service)
+    end
+
+    it "returns the result of injector#call" do
+      @result.should == @service
+    end
+
+    it "locates the service in the supplied namespace and instantiates" do
+      @injector.should have_received(:call).with(My::Service, :new)
+    end
   end
 
-  it "calls the injector with the generated constant" do
-    @injector.should have_received(:call).with(MyService, :new)
+  context "with a policy" do
+    before do
+      @policy = MyPolicy.new
+      @injector.stubs(:call).returns(@policy)
+      @result = @instantiator.call(:my, :policy)
+    end
+
+    it "returns the result of injector#call" do
+      @result.should == @policy
+    end
+
+    it "locates the policy namespace and instantiates" do
+      @injector.should have_received(:call).with(MyPolicy, :new)
+    end
   end
 end

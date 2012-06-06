@@ -7,7 +7,8 @@ module Objectify
     end
 
     def call(name, type)
-      klass = [name, type].join("_").classify.constantize
+      join_char = type == :policy ? "_" : "/"
+      klass = [name, type].join(join_char).classify.constantize
       @injector.call(klass, :new)
     end
   end
