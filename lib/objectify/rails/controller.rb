@@ -2,7 +2,6 @@ require "objectify/config/policies"
 require "objectify/executor"
 require "objectify/policy_chain_executor"
 require "objectify/instrumentation"
-require "objectify/rails/renderer"
 require "objectify/rails/routes"
 
 module Objectify
@@ -37,7 +36,6 @@ module Objectify
             injectables_context.add_value(:request, request)
             injectables_context.add_value(:response, response)
             injectables_context.add_value(:flash, flash)
-            injectables_context.add_value(:renderer, Renderer.new(self))
             injectables_context.add_value(:format, objectify_response_collector)
             injectables_context.add_value(:routes, objectify_routes)
           end
