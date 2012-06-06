@@ -42,7 +42,7 @@ module Objectify
         end
 
         def objectify_response_collector
-          @objectify_response_collector ||= ActionController::MimeResponds::Collector.new { default_response }
+          @objectify_response_collector ||= ActionController::MimeResponds::Collector.new {}
         end
         
         def objectify_executor
