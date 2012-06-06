@@ -20,6 +20,7 @@ describe "Objectify::Config::Action" do
       }
 
       @options = {
+        :namespace => :somewhere,
         :policies => :asdf,
         :skip_policies => :bsdf,
         :index => @index_options
@@ -72,12 +73,12 @@ describe "Objectify::Config::Action" do
                                               @route_factory)
     end
 
-    it "has a default service of \#{resource_name}_\#{action_name}" do
-      @action.service.should == :pictures_index
+    it "has a default service of \#{resource_name}/\#{action_name}" do
+      @action.service.should == "pictures/index"
     end
 
-    it "has a default responder of \#{resource_name}_\#{action_name}" do
-      @action.responder.should == :pictures_index
+    it "has a default responder of \#{resource_name}/\#{action_name}" do
+      @action.responder.should == "pictures/index"
     end
   end
 end

@@ -4,7 +4,8 @@ require "objectify/route"
 module Objectify
   module Config
     class Action
-      attr_reader :resource_name, :name, :route, :policies, :service, :responder
+      attr_reader :resource_name, :name, :route, :policies,
+                  :service, :responder, :namespace
 
       def initialize(routing_opts,
                      resource_name, name, options, default_policies,
@@ -13,6 +14,7 @@ module Objectify
         @resource_name = resource_name
         @name = name
         @policies = default_policies.merge(options, options[name])
+        @namespace = options[:namespace] || resource_name
 
         if options[name]
           @service = options[name][:service]
@@ -21,11 +23,11 @@ module Objectify
       end
 
       def service
-        @service ||= [resource_name, name].join("_").to_sym
+        @service ||= [namespace, name].join("/")
       end
 
       def responder
-        @responder ||= [resource_name, name].join("_").to_sym
+        @responder ||= [namespace, name].join("/")
       end
     end
   end
