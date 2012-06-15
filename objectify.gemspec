@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   # specify any dependencies here; for example:
-  s.add_development_dependency "rspec", "~> 2.4.0"
+  s.add_development_dependency "rspec", "~> 2.10.0"
   s.add_development_dependency "bundler", ">= 1.0.0"
   s.add_development_dependency "jeweler", "~> 1.6.4"
   s.add_development_dependency "bourne", "1.0"
