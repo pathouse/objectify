@@ -25,6 +25,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency "bourne", "1.0"
   s.add_development_dependency "mocha", "0.9.8"
 
-  s.add_runtime_dependency "rails", ">=3.0.0"
+  s.add_runtime_dependency "rails", ">=3.2.5"
   s.add_runtime_dependency "i18n"
 end

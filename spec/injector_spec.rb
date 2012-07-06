@@ -135,4 +135,55 @@ describe "Objectify::Injector" do
       @injector.call(ToBeDecorated, :new).should be_instance_of(ToBeDecorated)
     end
   end
+
+  module An
+    class Service
+      attr_reader :canada
+
+      def initialize(canada)
+        @canada = canada
+      end
+    end
+
+    class ServiceWithStuff
+      attr_reader :service
+
+      def initialize(service)
+        @service = service
+      end
+    end
+
+    class ServiceWithOtherStuff
+      def initialize(service, my_injected_class)
+        @service = service
+        @my_injected_class = my_injected_class
+      end
+    end
+
+    class Canada
+    end
+  end
+
+  context "within a namespace" do
+    before do
+      @config.stubs(:get).with(:canada).returns([:unknown, :canada])
+      @result = @injector.call(An::Service, :new)
+    end
+
+    it "first searches within the namespace to fulfill the dependency" do
+      @result.canada.should be_instance_of(An::Canada)
+    end
+
+    it "can decorate" do
+      @config.stubs(:decorators).with(:"an/service").returns([:"an/service_with_stuff"])
+      @injector.call(An::Service, :new).should be_instance_of(An::ServiceWithStuff)
+    end
+
+    it "can still look up the module chain for decorators" do
+      @config.stubs(:decorators).with(:"an/service").returns([:"an/service_with_other_stuff"])
+      @config.stubs(:get).with(:my_injected_class).returns([:unknown, :my_injected_class])
+      @config.stubs(:get).with(:some_dependency).returns([:value, :asdf])
+      @injector.call(An::Service, :new).should be_instance_of(An::ServiceWithOtherStuff)
+    end
+  end
 end
